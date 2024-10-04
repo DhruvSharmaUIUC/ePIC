@@ -15,7 +15,8 @@ double cal_limits[sizeof(cals)][2] = {{-4.05, -1.2}, {-1.2, 1.18}, {1.18, 4.2}};
 //Array containing the number of phi mesons with 0, 1, or 2 kaons for each calorimeter
 float calNums[sizeof(cals)][3];
 
-//Array containing the K1/K2 crossover within different calorimeters and an "All"
+//Array containing the K1/K2 crossover
+//within different calorimeters and an "All"
 float calMatrix[4][4];
 
 //Accepts a string cal_name containing the desired calorimeter name and returns true if an eta particle_eta is within acceptance for the given calorimeter
@@ -150,8 +151,7 @@ void ePIC_Analysis(){
     
     
   //Creates Kaon Occurrence Histogram
-  TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}",
-                        4, 0, 4, 4, 0, 4);
+  TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}", 4, 0, 4, 4, 0, 4);
     
   //X-bjorken Histogram
   TH1F *xBjorken = new TH1F("xBjorken", "xb", 100, 0, 0.075);

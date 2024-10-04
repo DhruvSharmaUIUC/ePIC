@@ -506,7 +506,8 @@ void ePIC_Plotting()
      gStyle->SetOptStat(0);
 
      TCanvas *canvas8 = new TCanvas(name8, strang, 800, 600);
-     
+     canvas8->SetLogx();
+    
      q2->Draw();
      canvas8->Draw();
      canvas8->Print(filename8, "pdf");
