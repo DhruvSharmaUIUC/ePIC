@@ -12,6 +12,9 @@ const char* LFHCAL_name = "LFHCAL";
 const char *cals[] = {nHCal_name, Barrel_name, LFHCAL_name};
 double cal_limits[sizeof(cals)][2] = {{-4.05, -1.2}, {-1.2, 1.18}, {1.18, 4.2}};
 
+double xb_val[1361];
+double q2_val[1361];
+
 //Array containing the number of phi mesons with 0, 1, or 2 kaons for each calorimeter
 float calNums[sizeof(cals)][3];
 
@@ -154,10 +157,10 @@ void ePIC_Analysis(){
   TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}", 4, 0, 4, 4, 0, 4);
     
   //X-bjorken Histogram
-  TH1F *xBjorken = new TH1F("xBjorken", "xb", 100, 0, 0.075);
+  TH1F *xBjorken = new TH1F("xBjorken", "xb", 100, 0.0001, 0.075);
     
   //q^2 Histogram
-  TH1F *q2 = new TH1F("q2", "q2 values", 100, 0,10);
+  TH1F *q2 = new TH1F("q2", "q2 values", 100, 1,10);
     
   //generatorStatus
   TH1D *generatorStatus = new TH1D("generatorStatus","Status of generated particles, all; generatorStatus",101,0,100);
@@ -252,7 +255,6 @@ void ePIC_Analysis(){
     float k2_eta = 0;
     cout << "+ Entering event #: " << ievgen << " \n";
     
-    cout << "Xb IS " << partXb[0] << " AND Q2 IS " << partQ2[0] << "\n";
     //cout << "Event #: " << ievgen << ", " << partGenStat.GetSize() << " gen particles, " << parents_index.GetSize() << " parent particles, " << daughters_index.GetSize() << " daughter particles \n";   // parent_index and daughter_index must be of the same length since they are in the same tree (is that what pushback does?)
 
     for(unsigned int i=0; i<partGenStat.GetSize(); i++) // Loop over generated particles
@@ -578,6 +580,9 @@ void ePIC_Analysis(){
       fill_Cal_Arr(k1_eta, k2_eta);
       xBjorken->Fill(partXb[0]);
       q2->Fill(partQ2[0]);
+      xb_val[ievgen] = partXb[0];
+      q2_val[ievgen] = partQ2[0];
+      cout << xb_val[ievgen] << " IS XB AND Q2 IS " << q2_val[ievgen] << "\n";
 
     //for(unsigned int k=0; k<trackMomX.GetSize(); k++){ // Loop over all reconstructed tracks, thrown or not
 
@@ -588,6 +593,9 @@ void ePIC_Analysis(){
     // now go to next event
     
   } // End loop over events
+    
+    TGraph *xB_v_q2 = new TGraph(ndecay_phi_kk, xb_val, q2_val);
+    xB_v_q2->Write("xB_v_q2");
 
   // Calculate fractions:
   double fraction_rho0_pionpm_nHCal = 0.;

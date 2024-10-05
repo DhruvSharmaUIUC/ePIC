@@ -447,6 +447,7 @@ void ePIC_Plotting()
     TH2D *kaonOccurrence = (TH2D*)ifile->Get("kaonOccurrence");
     kaonOccurrence->SetMinimum(-0.001);
     kaonOccurrence->SetMarkerColor(kWhite);
+    kaonOccurrence->SetMarkerSize(2);
     //Set bin labels
     kaonOccurrence->GetXaxis()->SetBinLabel(1,"LFHCal");
     kaonOccurrence->GetXaxis()->SetBinLabel(2,"Barrel");
@@ -496,23 +497,60 @@ void ePIC_Plotting()
     
     // End of xBjorken Histogram
     
-    // FILE 8 - q^2 histogram //
+// FILE 8 - q^2 histogram //
     TString name8 = TString("q2");
      
     TString filename8 = pdfdir + TString("/") + TString(name8) + TString(".pdf");
      
-     TH1D *q2 = (TH1D*)ifile->Get("q2");
+    TH1D *q2 = (TH1D*)ifile->Get("q2");
      
-     gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
 
-     TCanvas *canvas8 = new TCanvas(name8, strang, 800, 600);
-     canvas8->SetLogx();
+    TCanvas *canvas8 = new TCanvas(name8, strang, 800, 600);
+    canvas8->SetLogx();
     
-     q2->Draw();
-     canvas8->Draw();
-     canvas8->Print(filename8, "pdf");
+    q2->Draw();
+    canvas8->Draw();
+    canvas8->Print(filename8, "pdf");
      
-     // End of q^2 Histogram
+// End of FILE 8 - q^2 Histogram //
+    
+// FILE 9 - x_B vs q^2 Scatterplot  //
+    
+    TString name9 = TString("xB_v_q2");
+     
+    TString filename9 = pdfdir + TString("/") + TString(name9) + TString(".pdf");
+     
+    TGraph *xB_v_q2 = (TGraph*)ifile->Get("xB_v_q2");
+    xB_v_q2->Write(); //WRITE THE PASSED TGRAPH TO THE FILE(IMPORTANT)
+    
+    xB_v_q2->SetMinimum(1); //Set min val of q2 to 1
+    
+    //Make the points appear as larger red circles
+    xB_v_q2->SetMarkerColor(kRed);
+    xB_v_q2->SetMarkerStyle(20);
+    xB_v_q2->SetMarkerSize(0.5);
+    
+    //Add Title and Axis Labels
+    xB_v_q2->SetTitle("x_{b} vs q^{2} values");
+    xB_v_q2->GetXaxis()->SetTitle("x_{b}");
+    xB_v_q2->GetXaxis()->CenterLabels();
+    xB_v_q2->GetYaxis()->SetTitle("q^{2}");
+    xB_v_q2->GetYaxis()->CenterLabels();
+
+    gStyle->SetOptStat(0);
+
+    TCanvas *canvas9 = new TCanvas(name9, strang, 800, 600);
+    canvas9->SetLogx(); //Set log scales
+    canvas9->SetLogy();
+
+    xB_v_q2->Draw("AP"); //Draw "A" - Axes, and "P" - Points(NOT lines)
+    canvas9->Draw();
+    canvas9->Print(filename9, "pdf");
+     
+// End of FILE 9 - xB_vs_q2 Histogram //
+    
+    
   //
   cout << "Thank you for running Caro's macro.\n";
   gSystem->Exec("date");
