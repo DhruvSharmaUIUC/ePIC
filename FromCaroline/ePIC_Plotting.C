@@ -522,7 +522,6 @@ void ePIC_Plotting()
     TString filename9 = pdfdir + TString("/") + TString(name9) + TString(".pdf");
      
     TGraph *xB_v_q2 = (TGraph*)ifile->Get("xB_v_q2");
-    xB_v_q2->Write(); //WRITE THE PASSED TGRAPH TO THE FILE(IMPORTANT)
     
     xB_v_q2->SetMinimum(1); //Set min val of q2 to 1
     
@@ -533,9 +532,9 @@ void ePIC_Plotting()
     
     //Add Title and Axis Labels
     xB_v_q2->SetTitle("x_{b} vs q^{2} values");
-    xB_v_q2->GetXaxis()->SetTitle("x_{b}");
+    xB_v_q2->GetXaxis()->SetTitle("logx_{b}");
     xB_v_q2->GetXaxis()->CenterLabels();
-    xB_v_q2->GetYaxis()->SetTitle("q^{2}");
+    xB_v_q2->GetYaxis()->SetTitle("logq^{2}");
     xB_v_q2->GetYaxis()->CenterLabels();
 
     gStyle->SetOptStat(0);
@@ -548,7 +547,48 @@ void ePIC_Plotting()
     canvas9->Draw();
     canvas9->Print(filename9, "pdf");
      
-// End of FILE 9 - xB_vs_q2 Histogram //
+// End of FILE 9 - xB_vs_q2 scatterplot //
+    
+// FILE 10 - xB_v_percent plot //
+    
+    TString name10 = TString("xB_v_percent_0");
+     
+    TString filename10 = pdfdir + TString("/") + TString(name10) + TString(".pdf");
+     
+    TH1D *xB_v_percent_0 = (TH1D*)ifile->Get("xB_v_percent_0");
+    TH1D *xB_v_percent_1 = (TH1D*)ifile->Get("xB_v_percent_1");
+    TH1D *xB_v_percent_2 = (TH1D*)ifile->Get("xB_v_percent_2");
+    
+    gStyle->SetOptStat(0);
+
+    TCanvas *canvas10 = new TCanvas(name10, strang, 600, 600);
+    canvas10->SetLogx();
+
+    xB_v_percent_0->SetMarkerStyle(8);
+    xB_v_percent_0->SetMarkerColor(kBlack);
+    xB_v_percent_0->SetMaximum(1.2);
+    xB_v_percent_0->GetXaxis()->SetTitleOffset(1.2);
+    
+    xB_v_percent_1->SetMarkerStyle(8);
+    xB_v_percent_1->SetMarkerColor(kBlue);
+    
+    xB_v_percent_2->SetMarkerStyle(8);
+    xB_v_percent_2->SetMarkerColor(kRed);
+    
+    xB_v_percent_0->Draw("P");
+    xB_v_percent_1->Draw("same P");
+    xB_v_percent_2->Draw("same P");
+    
+    TLine *hundred_line = new TLine(0.,1.,1.,1.);  // (x1,y1,x2,y2)
+    hundred_line->SetLineColor(kBlack);
+    hundred_line->SetLineWidth(2);
+    hundred_line->SetLineStyle(kDashed);
+    hundred_line->Draw("same");
+    
+    canvas10->Draw();
+    canvas10->Print(filename10, "pdf");
+     
+// End of xB_v_percent plot
     
     
   //

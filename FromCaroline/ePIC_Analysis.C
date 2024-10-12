@@ -12,14 +12,10 @@ const char* LFHCAL_name = "LFHCAL";
 const char *cals[] = {nHCal_name, Barrel_name, LFHCAL_name};
 double cal_limits[sizeof(cals)][2] = {{-4.05, -1.2}, {-1.2, 1.18}, {1.18, 4.2}};
 
-double xb_val[1361];
-double q2_val[1361];
-
 //Array containing the number of phi mesons with 0, 1, or 2 kaons for each calorimeter
 float calNums[sizeof(cals)][3];
 
-//Array containing the K1/K2 crossover
-//within different calorimeters and an "All"
+//Array containing the K1/K2 crossover within different calorimeters and an "All"
 float calMatrix[4][4];
 
 //Accepts a string cal_name containing the desired calorimeter name and returns true if an eta particle_eta is within acceptance for the given calorimeter
@@ -70,6 +66,37 @@ void fill_Cal_Arr(float p1_eta, float p2_eta) {
         calMatrix[0][3]++;
     }
 }
+
+//Create a class phiDecay representing each decay and contain attributes of each decay in a single unit for access throughout the program
+class phiDecay {
+public:
+    float eta1, eta2;
+    int num_in_nHCal;
+    double x_b, q2;
+    
+    phiDecay(float e1, float e2, double xb_val, double q2_val) {
+        eta1 = e1;
+        eta2 = e2;
+        x_b = xb_val;
+        q2 = q2_val;
+        
+        int particles_in_cal = 0;
+        
+        if (in_Cal_Tolerance("nHCal", eta1)) {
+            particles_in_cal++; }
+        if (in_Cal_Tolerance("nHCal", eta2)) {
+            particles_in_cal++; }
+        
+        num_in_nHCal = particles_in_cal;
+    }
+    
+    phiDecay() {
+        
+    }
+};
+
+//Array to contain all decays
+phiDecay decays[1361];
 
 void ePIC_Analysis(){
 
@@ -150,17 +177,23 @@ void ePIC_Analysis(){
   
   // Define Histograms
     
-    
-    
-    
   //Creates Kaon Occurrence Histogram
   TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}", 4, 0, 4, 4, 0, 4);
     
   //X-bjorken Histogram
-  TH1F *xBjorken = new TH1F("xBjorken", "xb", 100, 0.0001, 0.075);
+  TH1F *xBjorken = new TH1F("xBjorken", "x_{b} value distribution", 100, 0, 0.075);
     
   //q^2 Histogram
-  TH1F *q2 = new TH1F("q2", "q2 values", 100, 1,10);
+  TH1F *q2 = new TH1F("q2", "q^{2} value distribution", 100, 1,10);
+    
+  //xB_v_q2 Graph
+  TGraph *xB_v_q2 = new TGraph();
+    
+  //xB vs percentage Histograms for 0, 1, 2 kaons in nHCal
+  int xB_percent_nBins = 100;
+  TH1F *xB_v_percent_0 = new TH1F("xB_v_percent_0", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
+  TH1F *xB_v_percent_1 = new TH1F("xB_v_percent_1", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
+  TH1F *xB_v_percent_2 = new TH1F("xB_v_percent_2", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
     
   //generatorStatus
   TH1D *generatorStatus = new TH1D("generatorStatus","Status of generated particles, all; generatorStatus",101,0,100);
@@ -568,21 +601,17 @@ void ePIC_Analysis(){
     } // End stable or decay particles condition
       } // End loop over thrown particles, within that event
       
-      if(kaons_in_nHCal == 2) { //Check if both kaons were within the nHCal acceptance, increment the counter
-          ndecay_phi_kaon_pair_nHCal++; }
-      if(kaons_in_nHCal == 1) { //Check if one of the two kaons was within the nHCal acceptance, increment the counter
-          ndecay_phi_kaon_single_nHCal++; }
-      if(kaons_in_nHCal == 0) { //Check if none of the two kaons were within the nHCal acceptance, increment the counter
-          ndecay_phi_kaon_none_nHCal++; }
+      //Create a phiDecay object for this decay and add it to the array
+      decays[ievgen] = phiDecay(k1_eta, k2_eta, partXb[0], partQ2[0]);
       
-      //Fill the calNums and calMatrix matrices with the given eta values for k1 and k2
-      kaons_in_Cal(k1_eta, k2_eta);
-      fill_Cal_Arr(k1_eta, k2_eta);
-      xBjorken->Fill(partXb[0]);
-      q2->Fill(partQ2[0]);
-      xb_val[ievgen] = partXb[0];
-      q2_val[ievgen] = partQ2[0];
-      cout << xb_val[ievgen] << " IS XB AND Q2 IS " << q2_val[ievgen] << "\n";
+      //Run methods to fill kaon occurrence matrices
+      kaons_in_Cal(decays[ievgen].eta1, decays[ievgen].eta2);
+      fill_Cal_Arr(decays[ievgen].eta1, decays[ievgen].eta2);
+      
+      //Fill Graphs/Histograms
+      xBjorken->Fill(decays[ievgen].x_b);
+      q2->Fill(decays[ievgen].q2);
+      xB_v_q2->AddPoint(decays[ievgen].x_b, decays[ievgen].q2);
 
     //for(unsigned int k=0; k<trackMomX.GetSize(); k++){ // Loop over all reconstructed tracks, thrown or not
 
@@ -594,7 +623,43 @@ void ePIC_Analysis(){
     
   } // End loop over events
     
-    TGraph *xB_v_q2 = new TGraph(ndecay_phi_kk, xb_val, q2_val);
+    //Create a special matrix at the end with 3 2D matrices for 0, 1, or 2 kaons
+    //The first row for each contains the total amount of decay with xb in each bin range
+    //The second row for each contains the number of decay with xb in each bin range that are within the nHCal tolerance
+    double inBins[4][xB_percent_nBins];
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < xB_percent_nBins; j++) {
+            inBins[i][j] = 0;
+        }
+    }
+    
+    for (phiDecay decay : decays) {
+        int bin_num = xB_v_percent_0->FindBin(decay.x_b);
+        cout << "xB " << decay.x_b << " and " << bin_num << "\n";
+        inBins[decay.num_in_nHCal][bin_num] += 1.0;
+        inBins[3][bin_num] += 1.0;
+    }
+    
+    for (int i = 0; i < 20; i++) {
+        cout << "BIN " << i << " AND ZERO COUNT IS " << inBins[0][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
+        //cout << "ONE COUNT IS " << inBins[1][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
+        //cout << "TWO COUNT IS " << inBins[2][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
+    }
+    
+    for (int i = 0; i < xB_percent_nBins; i++) {
+        cout << "NUM1 IS " << inBins[0][i] << " NUM2 IS " << inBins[3][i] << " FRAC IS " << inBins[0][i]/inBins[3][i] << "\n";
+        if (inBins[3][i] == 0) {
+            xB_v_percent_0->SetBinContent(i, 0);
+            xB_v_percent_1->SetBinContent(i, 0);
+            xB_v_percent_2->SetBinContent(i, 0);
+        } else {
+            xB_v_percent_0->SetBinContent(i, inBins[0][i] / inBins[3][i]);
+            xB_v_percent_1->SetBinContent(i, inBins[1][i] / inBins[3][i]);
+            xB_v_percent_2->SetBinContent(i, inBins[2][i] / inBins[3][i]);
+        }
+    }
+    
+    //Write data to TGraph
     xB_v_q2->Write("xB_v_q2");
 
   // Calculate fractions:
@@ -610,7 +675,7 @@ void ePIC_Analysis(){
     //Calculate each value of kaonOccurrence as a percentage of the total number of kaons
     for (int i = 1; i < 5; i++) {
         for (int j = 1; j < 5; j++) {
-            kaonOccurrence->SetBinContent(i,j, round(10*100*calMatrix[4-j][i-1]/ndecay_phi_kk)/10);
+            kaonOccurrence->SetBinContent(i,j, round(100*100*calMatrix[4-j][i-1]/ndecay_phi_kk)/100);
         }
     }
   //
