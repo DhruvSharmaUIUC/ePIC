@@ -194,6 +194,7 @@ void ePIC_Analysis(){
   TH1F *xB_v_percent_0 = new TH1F("xB_v_percent_0", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
   TH1F *xB_v_percent_1 = new TH1F("xB_v_percent_1", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
   TH1F *xB_v_percent_2 = new TH1F("xB_v_percent_2", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
+  TH1F *xB_v_percent_all = new TH1F("xB_v_percent_all", "x_{b} vs percent ocurrence (%);x_{b}", xB_percent_nBins, 0.0001, 0.1);
     
   //generatorStatus
   TH1D *generatorStatus = new TH1D("generatorStatus","Status of generated particles, all; generatorStatus",101,0,100);
@@ -623,41 +624,52 @@ void ePIC_Analysis(){
     
   } // End loop over events
     
-    //Create a special matrix at the end with 3 2D matrices for 0, 1, or 2 kaons
-    //The first row for each contains the total amount of decay with xb in each bin range
-    //The second row for each contains the number of decay with xb in each bin range that are within the nHCal tolerance
-    double inBins[4][xB_percent_nBins];
-    for (int i = 0; i < 4; i++) {
+    //start construction of xB_v_percent plot
+    
+    //Create a matrix with 4 rows containing values for each bin for 0, 1, 2 kaons in nHCal and all calo(WIP)
+    double inBins[5][xB_percent_nBins];
+    for (int i = 0; i < 5; i++) {
         for (int j = 0; j < xB_percent_nBins; j++) {
             inBins[i][j] = 0;
         }
     }
     
-    for (phiDecay decay : decays) {
+    for (phiDecay decay : decays) { // iterate over all the phidecays and inrement array bins
         int bin_num = xB_v_percent_0->FindBin(decay.x_b);
-        cout << "xB " << decay.x_b << " and " << bin_num << "\n";
-        inBins[decay.num_in_nHCal][bin_num] += 1.0;
-        inBins[3][bin_num] += 1.0;
+        inBins[decay.num_in_nHCal][bin_num] += 1.0; // increment bin of kaon in nHCal tolerance
+        
+        // Check if decay has eta in any calorimeter
+        if (in_Cal_Tolerance(cals[0], decay.eta1) || in_Cal_Tolerance(cals[0], decay.eta2) ||
+            in_Cal_Tolerance(cals[1], decay.eta1) || in_Cal_Tolerance(cals[1], decay.eta2) ||
+            in_Cal_Tolerance(cals[2], decay.eta1) || in_Cal_Tolerance(cals[2], decay.eta2)) {
+            inBins[3][bin_num] += 1.0;
+        }
+        inBins[4][bin_num] += 1.0;
     }
     
-    for (int i = 0; i < 20; i++) {
-        cout << "BIN " << i << " AND ZERO COUNT IS " << inBins[0][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
-        //cout << "ONE COUNT IS " << inBins[1][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
-        //cout << "TWO COUNT IS " << inBins[2][i] << " AND TOTAL IS " << inBins[3][i] << "\n";
-    }
-    
-    for (int i = 0; i < xB_percent_nBins; i++) {
-        cout << "NUM1 IS " << inBins[0][i] << " NUM2 IS " << inBins[3][i] << " FRAC IS " << inBins[0][i]/inBins[3][i] << "\n";
-        if (inBins[3][i] == 0) {
+    for (int i = 0; i < xB_percent_nBins; i++) { // fill histograms with values from array
+        if (inBins[4][i] == 0) { // to avoid 0/0, bins where the "all" is 0 will be set to 0
             xB_v_percent_0->SetBinContent(i, 0);
             xB_v_percent_1->SetBinContent(i, 0);
             xB_v_percent_2->SetBinContent(i, 0);
+            if (inBins[3][i] == 0) { // handle edge case to make 0/0 show 100% here
+                xB_v_percent_all->SetBinContent(i, 1);
+            } else {
+                xB_v_percent_all->SetBinContent(i, 0);
+            }
         } else {
-            xB_v_percent_0->SetBinContent(i, inBins[0][i] / inBins[3][i]);
-            xB_v_percent_1->SetBinContent(i, inBins[1][i] / inBins[3][i]);
-            xB_v_percent_2->SetBinContent(i, inBins[2][i] / inBins[3][i]);
+            xB_v_percent_0->SetBinContent(i, inBins[0][i] / inBins[4][i]);
+            xB_v_percent_1->SetBinContent(i, inBins[1][i] / inBins[4][i]);
+            xB_v_percent_2->SetBinContent(i, inBins[2][i] / inBins[4][i]);
+            xB_v_percent_all->SetBinContent(i, inBins[3][i] / inBins[4][i]);
         }
     }
+    
+    for (int i = 0; i < 100; i++) {
+        cout << "first is " << inBins[3][i] << " and " << inBins[4][i] << "so" << xB_v_percent_all->GetBinContent(i) << "\n";
+    }
+    
+    //end construction of xB_v_percent plot
     
     //Write data to TGraph
     xB_v_q2->Write("xB_v_q2");

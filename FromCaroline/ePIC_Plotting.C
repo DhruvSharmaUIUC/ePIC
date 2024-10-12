@@ -558,6 +558,7 @@ void ePIC_Plotting()
     TH1D *xB_v_percent_0 = (TH1D*)ifile->Get("xB_v_percent_0");
     TH1D *xB_v_percent_1 = (TH1D*)ifile->Get("xB_v_percent_1");
     TH1D *xB_v_percent_2 = (TH1D*)ifile->Get("xB_v_percent_2");
+    TH1D *xB_v_percent_all = (TH1D*)ifile->Get("xB_v_percent_all");
     
     gStyle->SetOptStat(0);
 
@@ -566,7 +567,8 @@ void ePIC_Plotting()
 
     xB_v_percent_0->SetMarkerStyle(8);
     xB_v_percent_0->SetMarkerColor(kBlack);
-    xB_v_percent_0->SetMaximum(1.2);
+    xB_v_percent_0->SetMaximum(1.4);
+    xB_v_percent_0->SetMinimum(-0.001);
     xB_v_percent_0->GetXaxis()->SetTitleOffset(1.2);
     
     xB_v_percent_1->SetMarkerStyle(8);
@@ -575,9 +577,21 @@ void ePIC_Plotting()
     xB_v_percent_2->SetMarkerStyle(8);
     xB_v_percent_2->SetMarkerColor(kRed);
     
+    xB_v_percent_all->SetMarkerStyle(8);
+    xB_v_percent_all->SetMarkerColor(kMagenta);
+    
     xB_v_percent_0->Draw("P");
     xB_v_percent_1->Draw("same P");
     xB_v_percent_2->Draw("same P");
+    xB_v_percent_all->Draw("same P");
+    
+    auto xB_percent_leg = new TLegend(0.48,0.7,0.78,0.88);
+    xB_percent_leg->SetFillStyle(0);
+    xB_percent_leg->AddEntry(xB_v_percent_0, "0-K in nHCAL", "P");
+    xB_percent_leg->AddEntry(xB_v_percent_1, "1-K in nHCAL", "P");
+    xB_percent_leg->AddEntry(xB_v_percent_2, "2-K in nHCAL", "P");
+    xB_percent_leg->AddEntry(xB_v_percent_all, "All Calo", "P");
+    xB_percent_leg->Draw();
     
     TLine *hundred_line = new TLine(0.,1.,1.,1.);  // (x1,y1,x2,y2)
     hundred_line->SetLineColor(kBlack);
