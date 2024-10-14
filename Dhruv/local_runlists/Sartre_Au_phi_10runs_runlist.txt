@@ -1,0 +1,11 @@
+data/Sartre/Au_phi
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0002.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0009.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0005.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0008.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0004.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0003.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0006.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0001.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0000.eicrecon.tree.edm4eic.root
+data/Sartre/Au_phi/sartre_bnonsat_Au_phi_ab_eAu_1.0007.eicrecon.tree.edm4eic.root
