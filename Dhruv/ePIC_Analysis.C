@@ -109,11 +109,11 @@ void ePIC_Analysis(){
   /////////////////////////////////////////////////////
   
   // Define input directory if reading locally:
-  const char indir[]="data";
+  const char indir[]="data/Sartre/Au_phi";
   cout << "Input directory is: " << indir << " \n";
     
   // Define name of local input MC file:
-  const char strang[]="sartre_bnonsat_Au_phi_ab_eAu_1.3998.eicrecon.tree.edm4eic"; // "strang = data string"
+  const char strang[]="sartre_bnonsat_Au_phi_ab_eAu_1.0009.eicrecon.tree.edm4eic"; // "strang = data string"
     //
   
   // define flavor of this macro:
@@ -178,7 +178,13 @@ void ePIC_Analysis(){
   // Define Histograms
     
   //Creates Kaon Occurrence Histogram
-  TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}", 4, 0, 4, 4, 0, 4);
+  TH2D *kaonOccurrence = new TH2D("kaonOccurrence", "Kaon HCal Acceptance (%);K_{1};K_{2}", 4, 0, 4, 4, 0, 4); // nbinsx, xlow, xup, nbinsy, ylow, yup
+  
+  //xB vs q2 histogram
+  TH2D *xB_q2_hist = new TH2D("xB_q2_hist", "kaon x_{b} vs q^{2} occurrence(%);logx_{b};logq^{2}", 40, 0, 0.005, 40, 1, 10); // nbinsx, xlow, xup, nbinsy, ylow, yup
+  
+  //Histogram displaying all eta of all kaons of run
+  TH1F *all_eta = new TH1F("all_eta", "all eta", 100, -5, 5);
     
   //X-bjorken Histogram
   TH1F *xBjorken = new TH1F("xBjorken", "x_{b} value distribution", 100, 0, 0.075);
@@ -562,6 +568,7 @@ void ePIC_Analysis(){
                 float recPhi_phi_k1 = recMom_phi_k1.Phi();
               kpmfromphiRecEta->Fill(recEta_phi_k1);
                 k1_eta = recEta_phi_k1;
+                all_eta->Fill(k1_eta);
                 
                 //Check that the kaon is within a given HCal, in this case nHCal
                 if(in_Cal_Tolerance(nHCal_name, recEta_phi_k1))
@@ -579,6 +586,7 @@ void ePIC_Analysis(){
                 float recPhi_phi_k2 = recMom_phi_k2.Phi();
               kpmfromphiRecEta->Fill(recEta_phi_k2);
                 k2_eta = recEta_phi_k2;
+                all_eta->Fill(k2_eta);
                 
                 //Check that the kaon is within a given HCal, in this case nHCal
                 if(in_Cal_Tolerance(nHCal_name, recEta_phi_k2))
@@ -613,7 +621,11 @@ void ePIC_Analysis(){
       xBjorken->Fill(decays[ievgen].x_b);
       q2->Fill(decays[ievgen].q2);
       xB_v_q2->AddPoint(decays[ievgen].x_b, decays[ievgen].q2);
-
+      
+      int bin_x = xB_q2_hist->GetXaxis()->FindBin(decays[ievgen].x_b);
+      int bin_y = xB_q2_hist->GetYaxis()->FindBin(decays[ievgen].q2);
+      xB_q2_hist->SetBinContent(bin_x, bin_y, xB_q2_hist->GetBinContent(bin_x, bin_y)+1);
+      
     //for(unsigned int k=0; k<trackMomX.GetSize(); k++){ // Loop over all reconstructed tracks, thrown or not
 
     //  TVector3 recMom(trackMomX[k], trackMomY[k], trackMomZ[k]);

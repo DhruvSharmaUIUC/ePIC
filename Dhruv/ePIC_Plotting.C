@@ -14,7 +14,7 @@ void ePIC_Plotting()
   //
   
   // Define name of MC file:
-  const char strang[]="sartre_bnonsat_Au_phi_ab_eAu_1.3998.eicrecon.tree.edm4eic";
+  const char strang[]="sartre_bnonsat_Au_phi_ab_eAu_1.0009.eicrecon.tree.edm4eic";
   cout << "Analyzed data will be of the type:\n " << strang << " .\n";
   
   // define flavor of this macro:  
@@ -603,6 +603,81 @@ void ePIC_Plotting()
     canvas10->Print(filename10, "pdf");
      
 // End of xB_v_percent plot
+    
+    // FILE 11 - xB_q2 HISTOGRAM //
+     
+    // Define the name of the plot:
+    TString name11 = TString("xB_q2_hist");
+     
+    // Define the name of the pdf file:
+    TString filename11 = pdfdir + TString("/") + TString(name11) + TString(".pdf");
+     
+    //Get the histogram data from ePIC_Analysis.C
+    TH2D *xB_q2_hist = (TH2D*)ifile->Get("xB_q2_hist");
+    xB_q2_hist->SetMarkerColor(kWhite);
+    xB_q2_hist->SetMarkerSize(2);
+    
+     //gStyle->SetOptStat(0);
+    TCanvas *canvas11 = new TCanvas(name11, strang, 600, 600);
+    canvas11->SetLogx();
+    canvas11->SetLogy();
+
+     // Set color palette and axis labels
+    canvas11->SetRightMargin(0.15);
+    canvas11->SetLeftMargin(0.15);
+
+    gStyle->SetPalette(kRainBow);// Choose color palette
+    gStyle->SetNumberContours(256);
+
+    xB_q2_hist->Draw("COLZ");
+
+    // Update the canvas
+    canvas11->Update();
+    
+    canvas11->Draw();
+    canvas11->Print(filename11, "pdf");
+
+    // end of xB_q2 histogram
+    
+    // start of all eta histogram
+    
+    TString name12 = TString("all_eta");
+     
+    TString filename12 = pdfdir + TString("/") + TString(name12) + TString(".pdf");
+     
+    TH1D *all_eta = (TH1D*)ifile->Get("all_eta");
+     
+    gStyle->SetOptStat(0);
+
+    TCanvas *canvas12 = new TCanvas(name12, strang, 800, 600);
+    
+    all_eta->Draw();
+    
+    TLine *nHCAL_min_line= new TLine(-4.05,0.,-4.05,75);  // (x1,y1,x2,y2)
+    nHCAL_min_line->SetLineColor(kBlack);
+    nHCAL_min_line->SetLineWidth(2);
+    nHCAL_min_line->SetLineStyle(kDashed);
+    nHCAL_min_line->Draw("same");
+    TLine *nHCAL_max_line= new TLine(-1.2,0.,-1.2,75);  // (x1,y1,x2,y2)
+    nHCAL_max_line->SetLineColor(kBlack);
+    nHCAL_max_line->SetLineWidth(2);
+    nHCAL_max_line->SetLineStyle(kDashed);
+    nHCAL_max_line->Draw("same");
+    TLine *LFHCAL_min_line= new TLine(1.18,0.,1.18,75);  // (x1,y1,x2,y2)
+    LFHCAL_min_line->SetLineColor(kBlack);
+    LFHCAL_min_line->SetLineWidth(2);
+    LFHCAL_min_line->SetLineStyle(kDashed);
+    LFHCAL_min_line->Draw("same");
+    TLine *LFHCAL_max_line= new TLine(4.2,0.,4.2,75);  // (x1,y1,x2,y2)
+    LFHCAL_max_line->SetLineColor(kBlack);
+    LFHCAL_max_line->SetLineWidth(2);
+    LFHCAL_max_line->SetLineStyle(kDashed);
+    LFHCAL_max_line->Draw("same");
+    
+    canvas12->Draw();
+    canvas12->Print(filename12, "pdf");
+    
+    // end of all eta histogram
     
     
   //
