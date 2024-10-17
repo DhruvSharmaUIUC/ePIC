@@ -635,6 +635,12 @@ void ePIC_Analysis(){
     // now go to next event
     
   } // End loop over events
+    int totnum = 0;
+    for (int i = 0; i < 100; i++) {
+        cout << "IT IS " << all_eta->GetBinContent(i) << "\n";
+        totnum += all_eta->GetBinContent(i);
+    }
+    cout << "TOTNUM = " << totnum;
     
     //start construction of xB_v_percent plot
     

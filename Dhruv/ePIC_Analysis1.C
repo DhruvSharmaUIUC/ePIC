@@ -98,7 +98,7 @@ public:
 //Array to contain all decays
 std::vector<phiDecay> decays;
 
-void ePIC_Analysis(){
+void ePIC_Analysis1(){
 
   gSystem->Exec("date");
   
@@ -113,8 +113,11 @@ void ePIC_Analysis(){
   cout << "Input directory is: " << indir << " \n";
     
   // Define name of local input MC file:
-  const char strang[]="sartre_bnonsat_Au_phi_ab_eAu_1.0009.eicrecon.tree.edm4eic"; // "strang = data string"
+  const char strang[]="Sartre_Au_phi_10runs"; // "strang = data string"
     //
+    
+    TString runlist_ram=TString("local_runlists/") + strang + TString("_runlist.txt");
+    const char *runlist=runlist_ram.Data();
   
   // define flavor of this macro:
   const char flavor[]="ePIC";
@@ -136,7 +139,11 @@ void ePIC_Analysis(){
   TChain *mychain = new TChain("events");
 
   // if reading a single file:
-  mychain->Add(infile);
+  //mychain->Add(infile);
+    
+    std::ifstream in(runlist);
+    std::string file("");
+    while (in >> file) mychain->Add(file.data());
   
   ///////////////////////////////////////
   //// end of automated definitions ////
@@ -291,8 +298,8 @@ void ePIC_Analysis(){
 
     ievgen++;
     int kaons_in_nHCal = 0; //set the number of kaons within tolerance to 0 and reset for each particle
-    float k1_eta = 0;
-    float k2_eta = 0;
+    float k1_eta;
+    float k2_eta;
     cout << "+ Entering event #: " << ievgen << " \n";
     
     //cout << "Event #: " << ievgen << ", " << partGenStat.GetSize() << " gen particles, " << parents_index.GetSize() << " parent particles, " << daughters_index.GetSize() << " daughter particles \n";   // parent_index and daughter_index must be of the same length since they are in the same tree (is that what pushback does?)
@@ -559,7 +566,6 @@ void ePIC_Analysis(){
         {
             
             //Create a phiDecay object for this decay and add it to the array
-            decays.push_back(phiDecay(k1_eta, k2_eta, partXb[0], partQ2[0]));
             
           if( simuAssoc[j] == daughters_index[i_daughters_begin] ) // get the reco decay pi1 of the gen rho0, by accessing the correct MCParticle index
             {
@@ -600,6 +606,8 @@ void ePIC_Analysis(){
             } else {
                 cout << "false\n";
             }*/
+            
+            decays.push_back(phiDecay(k1_eta, k2_eta, partXb[0], partQ2[0]));
             
             //Check if only one of the two kaons was within the nHCal acceptance
         } // end of phi(1020) decay into KK
